@@ -57,7 +57,7 @@ namespace FallGuysStats {
         public void Start(string logDirectory, string fileName) {
             if (running) { return; }
 
-            filePath = Path.Combine(logDirectory, "player-withtime.log");
+            filePath = Path.Combine(logDirectory, "Player.log");
             
             stop = false;
             watcher = new Thread(ReadLogFile) { IsBackground = true };
