@@ -337,37 +337,47 @@ namespace FallGuysStats {
                         openFile.InitialDirectory = currentExeLocation.Directory.FullName;
                     }*/
                     openFile.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                    openFile.Filter = "URL files (*.url)|*.url";
-                    openFile.FileName = "Fall Guys Clinet 바로가기";
-                    openFile.Title = "Fall Guys Client 바로가기 찾기";
+                    openFile.Filter = $"{Multilingual.GetWord("settings_fgclient_filter_shortcut")} (*.url)|*.url|{Multilingual.GetWord("settings_fgclient_filter_exe")} (*.exe)|*.exe";
+                    openFile.FileName = Multilingual.GetWord("settings_fgclient_file_name");
+                    openFile.Title = Multilingual.GetWord("settings_fgclient_title");
 
                     if (openFile.ShowDialog(this).Equals(DialogResult.OK)) {
-                        string fileContent = string.Empty;
-                        string epicGamesFallGuysApp = "50118b7f954e450f8823df1614b24e80%3A38ec4849ea4f4de6aa7b6fb0f2d278e1%3A0a2d9f6403244d12969e11da6713137b";
-                        FileStream fileStream = new FileStream(openFile.FileName ,FileMode.Open);
-                        using (StreamReader reader = new StreamReader(fileStream))
-                        {
-                            fileContent = reader.ReadToEnd();
-                        }
-                        
-                        string[] splitContent = fileContent.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                        string workingDir = string.Empty;
-                        string url = string.Empty;
-                        string iconFile = string.Empty;
-                        
-                        for (int i = 0; i < splitContent.Length; i++) {
-                            if (splitContent[i].ToLower().StartsWith("workingdirectory=")) {
-                                workingDir = splitContent[i].Substring(17);
-                            } else if (splitContent[i].ToLower().StartsWith("url=")) {
-                                url = splitContent[i].Substring(4);
-                            } else if (splitContent[i].ToLower().StartsWith("iconfile=")) {
-                                iconFile = splitContent[i].Substring(9);
+                        if (Path.GetExtension(openFile.FileName) == ".url") {
+                            string fileContent = string.Empty;
+                            string epicGamesFallGuysApp = "50118b7f954e450f8823df1614b24e80%3A38ec4849ea4f4de6aa7b6fb0f2d278e1%3A0a2d9f6403244d12969e11da6713137b";
+                            FileStream fileStream = new FileStream(openFile.FileName, FileMode.Open);
+                            using (StreamReader reader = new StreamReader(fileStream)) {
+                                fileContent = reader.ReadToEnd();
                             }
-                        }
 
-                        if (url.ToLower().StartsWith("com.epicgames.launcher://apps") && url.IndexOf(epicGamesFallGuysApp) != -1) {
-                            this.txtGameExeLocation.Text = url;
-                            this.txtGameFileLocation.Text = iconFile;
+                            string[] splitContent = fileContent.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                            string workingDir = string.Empty;
+                            string url = string.Empty;
+                            string iconFile = string.Empty;
+
+                            for (int i = 0; i < splitContent.Length; i++) {
+                                if (splitContent[i].ToLower().StartsWith("workingdirectory=")) {
+                                    workingDir = splitContent[i].Substring(17);
+                                } else if (splitContent[i].ToLower().StartsWith("url=")) {
+                                    url = splitContent[i].Substring(4);
+                                } else if (splitContent[i].ToLower().StartsWith("iconfile=")) {
+                                    iconFile = splitContent[i].Substring(9);
+                                }
+                            }
+
+                            if (url.ToLower().StartsWith("com.epicgames.launcher://apps") && url.IndexOf(epicGamesFallGuysApp) != -1) {
+                                this.txtGameExeLocation.Text = url;
+                                this.txtGameFileLocation.Text = iconFile;
+                            } else {
+                                MessageBox.Show(Multilingual.GetWord("message_wrong_file_selected"), Multilingual.GetWord("message_wrong_file_selected_caption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        } else if (Path.GetExtension(openFile.FileName) == ".exe") {
+                            if (openFile.FileName.IndexOf("FallGuys_client", StringComparison.OrdinalIgnoreCase) >= 0) {
+                                txtGameExeLocation.Text = openFile.FileName;
+                                txtGameFileLocation.Text = openFile.FileName;
+                            } else {
+                                MessageBox.Show(Multilingual.GetWord("message_wrong_file_selected"), Multilingual.GetWord("message_wrong_file_selected_caption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
                         } else {
                             MessageBox.Show(Multilingual.GetWord("message_wrong_file_selected"), Multilingual.GetWord("message_wrong_file_selected_caption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
