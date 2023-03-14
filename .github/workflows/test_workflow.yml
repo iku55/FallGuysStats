@@ -1,0 +1,18 @@
+name: GitHub Actions Test
+run-name: Testing Github Actions
+on: [push]
+jobs:
+  test:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+      - name: MSBuild
+        run: msbuild /t:build /p:configuration=Release /p:platform="Any CPU"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: artifacts_build
+          path: Builds
