@@ -11,8 +11,20 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.2
       - name: MSBuild
         run: msbuild /t:build /p:configuration=Release /p:platform="Any CPU"
+      - name: Compress artifacts
+        shell: powershell
+        run: Compress-Archive -Path bin\* -DestinationPath Builds/release.zip
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
           name: artifacts_build
-          path: Builds
+          path: Builds/release.zip
+      - name: Release build
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            Builds/release.zip
