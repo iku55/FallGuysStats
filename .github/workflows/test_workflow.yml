@@ -78,11 +78,11 @@ jobs:
           name: FallGuysStats
           path: FallGuysStats.zip
   commit:
-    name: Commit and release
+    name: Commit Files
     runs-on: windows-latest
     outputs:
       version: ${{ steps.checkver.outputs.VERSION }}
-    needs: [change_ver, build_manual_update, build]
+    needs: [build_manual_update, build]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -124,6 +124,34 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: test
+  release:
+    name: Release
+    runs-on: windows-latest
+    needs: commit
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download Artifacts AssemblyInfo
+        uses: actions/download-artifact@v3
+        with:
+          name: AssemblyInfo
+          path: Properties
+      - name: Download Artifacts FallGuysStatsManualUpdate
+        uses: actions/download-artifact@v3
+        with:
+          name: FallGuysStatsManualUpdate
+      - name: Download Artifacts FallGuysStats
+        uses: actions/download-artifact@v3
+        with:
+          name: FallGuysStats
+      - name: Check version
+        id: checkver
+        shell: powershell
+        run: |
+          $fileName = "Properties\AssemblyInfo.cs"
+          $data = Get-Content $fileName
+          $output = "::set-output name=version::"+$data[12].Substring(30,3)
+          echo $output
       - name: Release build
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
