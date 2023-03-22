@@ -105,18 +105,18 @@ jobs:
         run: |
           $fileName = "Properties\AssemblyInfo.cs"
           $data = Get-Content $fileName
-          $output = "VERSION="+$data[12].Substring(30,3)
-          echo $output >> $GITHUB_OUTPUT
+          $output = "::set-output name=version::"+$data[12].Substring(30,3)
+          echo $output
       - name: Commit changes
         id: commit
         run: |
-          echo ${{jobs.build.outputs.version}}
+          echo ${{steps.checkver.outputs.version}}
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions"
           git add Properties/AssemblyInfo.cs
           git add FallGuysStats.zip
           git add FallGuysStatsManualUpdate.zip
-          git commit -m "Version 1.${{jobs.build.outputs.version}} Update" -a
+          git commit -m "Version 1.${{steps.checkver.outputs.version}} Update" -a
           echo "::set-output name=push::true"
         shell: bash
       - name: Push changes
@@ -130,9 +130,9 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.${{jobs.build.outputs.version}}.0"
+          automatic_release_tag: "v1.${{steps.checkver.outputs.version}}.0"
           prerelease: false
-          title: "Release v1.${{jobs.build.outputs.version}}"
+          title: "Release v1.${{steps.checkver.outputs.version}}"
           files: |
             FallGuysStats.zip
             FallGuysStatsManualUpdate.zip
