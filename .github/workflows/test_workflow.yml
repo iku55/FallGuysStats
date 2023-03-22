@@ -36,14 +36,14 @@ jobs:
     runs-on: windows-latest
     needs: change_ver
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
           name: AssemblyInfo
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
-      - name: Tree
-        run: tree
       - name: Build
         run: msbuild /t:build /p:configuration=Release /p:platform="Any CPU"
       - name: Compress artifacts
@@ -60,12 +60,12 @@ jobs:
     runs-on: windows-latest
     needs: change_ver
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
           name: AssemblyInfo
-      - name: Tree
-        run: tree
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
@@ -83,6 +83,8 @@ jobs:
     runs-on: windows-latest
     needs: [build_manual_update, build]
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Download Artifacts AssemblyInfo
         uses: actions/download-artifact@v3
         with:
