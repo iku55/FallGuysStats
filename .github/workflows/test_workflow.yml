@@ -99,6 +99,7 @@ jobs:
           name: FallGuysStats
       - name: Check version
         id: checkver
+        shell: powershell
         run: |
           $fileName = "Properties\AssemblyInfo.cs"
           $data = Get-Content $fileName
