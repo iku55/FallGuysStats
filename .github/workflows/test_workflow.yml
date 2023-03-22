@@ -98,21 +98,22 @@ jobs:
         with:
           name: FallGuysStats
       - name: Check version
-        id: check_ver
+        id: checkver
         run: |
           $fileName = "Properties\AssemblyInfo.cs"
           $data = Get-Content $fileName
-          echo ("VERSION="+$data[12].Substring(30,3)) >> $GITHUB_OUTPUT
+          $output = "VERSION="+$data[12].Substring(30,3)
+          echo $output >> $GITHUB_OUTPUT
       - name: Commit changes
         id: commit
         run: |
-          echo ${{steps.check_ver.outputs.VERSION}}
+          echo ${{steps.checkver.outputs.VERSION}}
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions"
           git add Properties/AssemblyInfo.cs
           git add FallGuysStats.zip
           git add FallGuysStatsManualUpdate.zip
-          git commit -m "Version 1.${{steps.check_ver.outputs.VERSION}} Update" -a
+          git commit -m "Version 1.${{steps.checkver.outputs.VERSION}} Update" -a
           echo "::set-output name=push::true"
         shell: bash
       - name: Push changes
@@ -126,9 +127,9 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.${{steps.check_ver.outputs.VERSION}}.0"
+          automatic_release_tag: "v1.${{steps.checkver.outputs.VERSION}}.0"
           prerelease: false
-          title: "Release v1.${{steps.check_ver.outputs.VERSION}}"
+          title: "Release v1.${{steps.checkver.outputs.VERSION}}"
           files: |
             FallGuysStats.zip
             FallGuysStatsManualUpdate.zip
