@@ -106,7 +106,7 @@ jobs:
       - name: Commit changes
         id: commit
         run: |
-          echo ${{env}}
+          echo $VERSION ${{env.VERSION}} ${{vars.VERSION}} 
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions"
           git add Properties/AssemblyInfo.cs
