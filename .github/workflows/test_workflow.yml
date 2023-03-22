@@ -25,6 +25,8 @@ jobs:
           $data[13] = "[assembly: AssemblyFileVersion(`"1."+$newVersion+".0.0`")]"
           Set-Content $fileName $data
           echo "new_version="+$newVersion >> $GITHUB_OUTPUT
+          echo "v1."+$newVersion
+          echo "v1.${{ steps.change_ver.outputs.new_version }}"
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
@@ -42,6 +44,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: AssemblyInfo
+          path: Properties
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
@@ -66,6 +69,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: AssemblyInfo
+          path: Properties
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
@@ -89,6 +93,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: AssemblyInfo
+          path: Properties
       - name: Download Artifacts FallGuysStatsManualUpdate
         uses: actions/download-artifact@v3
         with:
@@ -99,13 +104,15 @@ jobs:
           name: FallGuysStats
       - name: Commit changes
         id: commit
+        env:
+          new_version: ${{ needs.change_ver.outputs.new_version }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions"
           git add Properties/AssemblyInfo.cs
           git add FallGuysStats.zip
           git add FallGuysStatsManualUpdate.zip
-          git commit -m "Version 1.${{ needs.change_ver.outputs.new_version }} Update" -a
+          git commit -m "Version 1.$new_version Update" -a
           echo "::set-output name=push::true"
         shell: bash
       - name: Push changes
@@ -115,12 +122,14 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: test
       - name: Release build
+        env:
+          new_version: ${{ needs.change_ver.outputs.new_version }}
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.${{ needs.change_ver.outputs.new_version }}.0"
+          automatic_release_tag: "v1.$new_version.0"
           prerelease: false
-          title: "Release v1.${{ needs.change_ver.outputs.new_version }}"
+          title: "Release v1.$new_version"
           files: |
             FallGuysStats.zip
             FallGuysStatsManualUpdate.zip
