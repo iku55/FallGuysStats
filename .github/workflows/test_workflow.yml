@@ -106,27 +106,29 @@ jobs:
       - name: Commit changes
         id: commit
         run: |
+          echo ${{env}}
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions"
           git add Properties/AssemblyInfo.cs
           git add FallGuysStats.zip
           git add FallGuysStatsManualUpdate.zip
-          git commit -m "Version 1.${{ env.VERSION }} Update" -a
+          git commit -m "Version 1.${{env.VERSION}} Update" -a
           echo "::set-output name=push::true"
         shell: bash
       - name: Push changes
-        if: steps.commit.outputs.push == 'true'
+        if: steps.commit.outputs.push !== 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: test
       - name: Release build
+        if: 1 == 0
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.${{ env.VERSION }}.0"
+          automatic_release_tag: "v1.${{env.VERSION}}.0"
           prerelease: false
-          title: "Release v1.${{ env.VERSION }}"
+          title: "Release v1.${{env.VERSION}}"
           files: |
             FallGuysStats.zip
             FallGuysStatsManualUpdate.zip
