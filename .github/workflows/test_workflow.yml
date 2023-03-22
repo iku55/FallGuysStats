@@ -42,9 +42,9 @@ jobs:
           name: AssemblyInfo
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
-      - name: Build (FallGuysStatsManualUpdate)
+      - name: Build
         run: msbuild /t:build /p:configuration=Release /p:platform="Any CPU"
-      - name: Compress artifacts (FallGuysStatsManualUpdate)
+      - name: Compress artifacts
         shell: powershell
         run: Compress-Archive -Path bin\* -DestinationPath FallGuysStatsManualUpdate.zip
       - name: Upload artifacts
@@ -62,6 +62,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: AssemblyInfo
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
         run: msbuild /t:build /p:configuration=ReleaseUpdate /p:platform="Any CPU"
       - name: Compress artifacts
