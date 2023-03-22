@@ -80,6 +80,8 @@ jobs:
   commit:
     name: Commit and release
     runs-on: windows-latest
+    outputs:
+      version: ${{ steps.checkver.outputs.VERSION }}
     needs: [change_ver, build_manual_update, build]
     steps:
       - name: Checkout
@@ -108,13 +110,13 @@ jobs:
       - name: Commit changes
         id: commit
         run: |
-          echo ${{steps.checkver.outputs.VERSION}}
+          echo ${{jobs.build.outputs.version}}
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions"
           git add Properties/AssemblyInfo.cs
           git add FallGuysStats.zip
           git add FallGuysStatsManualUpdate.zip
-          git commit -m "Version 1.${{steps.checkver.outputs.VERSION}} Update" -a
+          git commit -m "Version 1.${{jobs.build.outputs.version}} Update" -a
           echo "::set-output name=push::true"
         shell: bash
       - name: Push changes
@@ -128,9 +130,9 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.${{steps.checkver.outputs.VERSION}}.0"
+          automatic_release_tag: "v1.${{jobs.build.outputs.version}}.0"
           prerelease: false
-          title: "Release v1.${{steps.checkver.outputs.VERSION}}"
+          title: "Release v1.${{jobs.build.outputs.version}}"
           files: |
             FallGuysStats.zip
             FallGuysStatsManualUpdate.zip
