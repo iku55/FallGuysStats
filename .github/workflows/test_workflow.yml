@@ -110,7 +110,7 @@ jobs:
           git add Properties/AssemblyInfo.cs
           git add FallGuysStats.zip
           git add FallGuysStatsManualUpdate.zip
-          git commit -m "Version 1.$VERSION Update" -a
+          git commit -m "Version 1.${{ env.VERSION }} Update" -a
           echo "::set-output name=push::true"
         shell: bash
       - name: Push changes
@@ -123,9 +123,9 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.$VERSION.0"
+          automatic_release_tag: "v1.${{ env.VERSION }}.0"
           prerelease: false
-          title: "Release v1.$VERSION"
+          title: "Release v1.${{ env.VERSION }}"
           files: |
             FallGuysStats.zip
             FallGuysStatsManualUpdate.zip
