@@ -9,8 +9,6 @@ jobs:
   change_ver:
     name: Change version
     runs-on: windows-latest
-    outputs:
-      value: ${{ steps.change_ver.outputs.new_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -24,9 +22,6 @@ jobs:
           $data[12] = "[assembly: AssemblyVersion(`"1."+$newVersion+".0.0`")]"
           $data[13] = "[assembly: AssemblyFileVersion(`"1."+$newVersion+".0.0`")]"
           Set-Content $fileName $data
-          echo "new_version="+$newVersion >> $GITHUB_OUTPUT
-          echo "v1."+$newVersion
-          echo "v1.${{ steps.change_ver.outputs.new_version }}"
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
@@ -102,17 +97,20 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: FallGuysStats
+      - name: Check version
+        run: |
+          $fileName = "Properties\AssemblyInfo.cs"
+          $data = Get-Content $fileName
+          echo "VERSION="+$data[12].Substring(30,3) >> $GITHUB_ENV
       - name: Commit changes
         id: commit
-        env:
-          new_version: ${{ needs.change_ver.outputs.new_version }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions"
           git add Properties/AssemblyInfo.cs
           git add FallGuysStats.zip
           git add FallGuysStatsManualUpdate.zip
-          git commit -m "Version 1.$new_version Update" -a
+          git commit -m "Version 1.$VERSION Update" -a
           echo "::set-output name=push::true"
         shell: bash
       - name: Push changes
@@ -122,14 +120,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: test
       - name: Release build
-        env:
-          new_version: ${{ needs.change_ver.outputs.new_version }}
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.$new_version.0"
+          automatic_release_tag: "v1.$VERSION.0"
           prerelease: false
-          title: "Release v1.$new_version"
+          title: "Release v1.$VERSION"
           files: |
             FallGuysStats.zip
             FallGuysStatsManualUpdate.zip
