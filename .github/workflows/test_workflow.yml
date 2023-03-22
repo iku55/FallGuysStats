@@ -19,8 +19,8 @@ jobs:
           $fileName = "Properties\AssemblyInfo.cs"
           $data = Get-Content $fileName
           $newVersion = [int]$data[12].Substring(30,3)+1
-          $data[12] = "[assembly: AssemblyVersion(`"1."+$newVersion+".0.0`")]"
-          $data[13] = "[assembly: AssemblyFileVersion(`"1."+$newVersion+".0.0`")]"
+          $data[12] = "[assembly: AssemblyVersion(`"1.$newVersion.0.0`")]"
+          $data[13] = "[assembly: AssemblyFileVersion(`"1.$newVersion.0.0`")]"
           Set-Content $fileName $data
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
@@ -99,9 +99,10 @@ jobs:
           name: FallGuysStats
       - name: Check version
         run: |
+          tree
           $fileName = "Properties\AssemblyInfo.cs"
           $data = Get-Content $fileName
-          echo "VERSION="+$data[12].Substring(30,3) >> $GITHUB_ENV
+          echo ("VERSION="+$data[12].Substring(30,3)) >> $GITHUB_ENV
       - name: Commit changes
         id: commit
         run: |
