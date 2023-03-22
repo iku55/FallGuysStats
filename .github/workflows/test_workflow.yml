@@ -24,7 +24,7 @@ jobs:
           $data[12] = "[assembly: AssemblyVersion(`"1."+$newVersion+".0.0`")]"
           $data[13] = "[assembly: AssemblyFileVersion(`"1."+$newVersion+".0.0`")]"
           Set-Content $fileName $data
-          echo "::set-output name=new_version::"+$newVersion
+          echo "new_version="+$newVersion >> $GITHUB_OUTPUT
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
@@ -42,6 +42,8 @@ jobs:
           name: AssemblyInfo
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
+      - name: Tree
+        run: tree
       - name: Build
         run: msbuild /t:build /p:configuration=Release /p:platform="Any CPU"
       - name: Compress artifacts
@@ -62,6 +64,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: AssemblyInfo
+      - name: Tree
+        run: tree
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
