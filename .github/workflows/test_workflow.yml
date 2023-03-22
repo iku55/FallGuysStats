@@ -47,9 +47,9 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.${{ new_version }}.0"
+          automatic_release_tag: "v1.${{ env.new_version }}.0"
           prerelease: false
-          title: "Release v1.${{ new_version }}.0"
+          title: "Release v1.${{ env.new_version }}.0"
           files: |
             FallGuysStats.zip
             FallGuysStatsManualUpdate.zip
