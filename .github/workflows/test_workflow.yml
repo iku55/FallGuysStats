@@ -6,12 +6,16 @@ on:
       - 'main'
       - 'test'
 jobs:
-  update:
-    runs-on: windows-2019
+  change_ver:
+    name: Change version
+    runs-on: windows-latest
+    outputs:
+      value: ${{ steps.change_ver.outputs.new_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Change version
+        id: change_ver
         shell: powershell
         run: |
           $fileName = "Properties\AssemblyInfo.cs"
@@ -20,7 +24,22 @@ jobs:
           $data[12] = "[assembly: AssemblyVersion(`"1."+$newVersion+".0.0`")]"
           $data[13] = "[assembly: AssemblyFileVersion(`"1."+$newVersion+".0.0`")]"
           Set-Content $fileName $data
-          echo "new_version="+$newVersion >> $GITHUB_ENV
+          echo "::set-output name=new_version::"+$newVersion
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: AssemblyInfo
+          path: Properties/AssemblyInfo.cs
+
+  build_manual_update:
+    name: Build FallGuysStatsManualUpdate.zip
+    runs-on: windows-latest
+    needs: change_ver
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: AssemblyInfo
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build (FallGuysStatsManualUpdate)
@@ -28,9 +47,21 @@ jobs:
       - name: Compress artifacts (FallGuysStatsManualUpdate)
         shell: powershell
         run: Compress-Archive -Path bin\* -DestinationPath FallGuysStatsManualUpdate.zip
-      - name: Clean artifacts (FallGuysStatsManualUpdate)
-        shell: powershell
-        run: Remove-Item -Path bin -Recurse
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: FallGuysStatsManualUpdate
+          path: FallGuysStatsManualUpdate.zip
+
+  build:
+    name: Build FallGuysStats.zip
+    runs-on: windows-latest
+    needs: change_ver
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: AssemblyInfo
       - name: Build
         run: msbuild /t:build /p:configuration=ReleaseUpdate /p:platform="Any CPU"
       - name: Compress artifacts
@@ -39,10 +70,25 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
-          name: build_artifacts
-          path: |
-            FallGuysStats.zip
-            FallGuysStatsManualUpdate.zip
+          name: FallGuysStats
+          path: FallGuysStats.zip
+  commit:
+    name: Commit and release
+    runs-on: windows-latest
+    needs: [build_manual_update, build]
+    steps:
+      - name: Download Artifacts AssemblyInfo
+        uses: actions/download-artifact@v3
+        with:
+          name: AssemblyInfo
+      - name: Download Artifacts FallGuysStatsManualUpdate
+        uses: actions/download-artifact@v3
+        with:
+          name: FallGuysStatsManualUpdate
+      - name: Download Artifacts FallGuysStats
+        uses: actions/download-artifact@v3
+        with:
+          name: FallGuysStats
       - name: Commit changes
         id: commit
         run: |
@@ -51,7 +97,7 @@ jobs:
           git add Properties/AssemblyInfo.cs
           git add FallGuysStats.zip
           git add FallGuysStatsManualUpdate.zip
-          git commit -m "Version 1.${{ env.new_version }} Update" -a
+          git commit -m "Version 1.${{ needs.first-change_ver.outputs.new_version }} Update" -a
           echo "::set-output name=push::true"
         shell: bash
       - name: Push changes
@@ -63,9 +109,9 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.${{ env.new_version }}.0"
+          automatic_release_tag: "v1.${{ needs.first-change_ver.outputs.new_version }}.0"
           prerelease: false
-          title: "Release v1.${{ env.new_version }}"
+          title: "Release v1.${{ needs.first-change_ver.outputs.new_version }}"
           files: |
             FallGuysStats.zip
             FallGuysStatsManualUpdate.zip
