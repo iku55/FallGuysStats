@@ -30,7 +30,7 @@ jobs:
         run: Compress-Archive -Path bin\* -DestinationPath FallGuysStatsManualUpdate.zip
       - name: Clean artifacts (FallGuysStatsManualUpdate)
         shell: powershell
-        run: Remove-Item -Path bin
+        run: Remove-Item -Path bin -Recurse
       - name: Build
         run: msbuild /t:build /p:configuration=ReleaseUpdate /p:platform="Any CPU"
       - name: Compress artifacts
