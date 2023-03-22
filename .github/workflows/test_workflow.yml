@@ -48,7 +48,7 @@ jobs:
         run: msbuild /t:build /p:configuration=Release /p:platform="Any CPU"
       - name: Compress artifacts
         shell: powershell
-        run: Compress-Archive -Path bin\* -DestinationPath FallGuysStatsManualUpdate.zip
+        run: Compress-Archive -Path bin\* -DestinationPath FallGuysStatsManualUpdate.zip -Update
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
@@ -72,7 +72,7 @@ jobs:
         run: msbuild /t:build /p:configuration=ReleaseUpdate /p:platform="Any CPU"
       - name: Compress artifacts
         shell: powershell
-        run: Compress-Archive -Path bin\* -DestinationPath FallGuysStats.zip
+        run: Compress-Archive -Path bin\* -DestinationPath FallGuysStats.zip -Update
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
