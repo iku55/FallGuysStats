@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Change version
         id: change_ver
         shell: powershell
@@ -34,7 +34,7 @@ jobs:
     needs: change_ver
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
@@ -59,7 +59,7 @@ jobs:
     needs: change_ver
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
@@ -85,7 +85,7 @@ jobs:
     needs: [build_manual_update, build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download Artifacts AssemblyInfo
         uses: actions/download-artifact@v3
         with:
@@ -130,7 +130,7 @@ jobs:
     needs: commit
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download Artifacts AssemblyInfo
         uses: actions/download-artifact@v3
         with:
@@ -153,12 +153,13 @@ jobs:
           $output = "::set-output name=version::"+$data[12].Substring(30,3)
           echo $output
       - name: Release build
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: "softprops/action-gh-release@v1"
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v1.${{steps.checkver.outputs.version}}.0"
+          name: "Release v1.${{steps.checkver.outputs.version}}"
+          tag_name: "v1.${{steps.checkver.outputs.version}}.0"
           prerelease: false
-          title: "Release v1.${{steps.checkver.outputs.version}}"
+          body: |
+            This release was triggered by commit ${{ env.GITHUB_SHA }} and released automatically.
           files: |
             FallGuysStats.zip
             FallGuysStatsManualUpdate.zip
